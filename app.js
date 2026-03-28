@@ -4,6 +4,7 @@ const state = {
   rooms: [],
   messages: [],
   ws: null,
+  pollTimer: null,
 };
 
 const routes = ["todos", "notes", "chat"];
@@ -71,7 +72,7 @@ async function api(path, options = {}) {
 function bindTodoActions() {
   document.querySelector("#todo-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    setStatus("Saving todo...");
+    setStatus("Saving todo");
 
     const payload = {
       title: document.querySelector("#todo-title").value.trim(),
@@ -87,7 +88,7 @@ function bindTodoActions() {
       await loadTodos();
       setStatus("Todo saved");
     } catch (error) {
-      setStatus(`Todo error: ${error.message}`);
+      setStatus(`Todo failed: ${error.message}`);
     }
   });
 
@@ -100,7 +101,7 @@ async function loadTodos() {
     state.todos = await api("/api/todos");
     renderTodos();
   } catch (error) {
-    setStatus(`Load todos failed: ${error.message}`);
+    setStatus(`Todo load failed: ${error.message}`);
   }
 }
 
@@ -130,23 +131,31 @@ function renderTodos() {
     `;
 
     item.querySelector('[data-action="toggle"]').addEventListener("click", async () => {
-      const payload = {
-        title: todo.title,
-        description: todo.description,
-        priority: todo.priority,
-        dueDate: todo.dueDate,
-        completed: !todo.completed,
-      };
-      await api(`/api/todo?id=${encodeURIComponent(todo.id)}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-      await loadTodos();
+      try {
+        const payload = {
+          title: todo.title,
+          description: todo.description,
+          priority: todo.priority,
+          dueDate: todo.dueDate,
+          completed: !todo.completed,
+        };
+        await api(`/api/todo?id=${encodeURIComponent(todo.id)}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+        await loadTodos();
+      } catch (error) {
+        setStatus(`Todo update failed: ${error.message}`);
+      }
     });
 
     item.querySelector('[data-action="delete"]').addEventListener("click", async () => {
-      await api(`/api/todo?id=${encodeURIComponent(todo.id)}`, { method: "DELETE" });
-      await loadTodos();
+      try {
+        await api(`/api/todo?id=${encodeURIComponent(todo.id)}`, { method: "DELETE" });
+        await loadTodos();
+      } catch (error) {
+        setStatus(`Todo delete failed: ${error.message}`);
+      }
     });
 
     list.appendChild(item);
@@ -156,7 +165,7 @@ function renderTodos() {
 function bindNoteActions() {
   document.querySelector("#note-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    setStatus("Saving note...");
+    setStatus("Saving note");
 
     const payload = {
       title: document.querySelector("#note-title").value.trim(),
@@ -174,7 +183,7 @@ function bindNoteActions() {
       await loadNotes();
       setStatus("Note saved");
     } catch (error) {
-      setStatus(`Note error: ${error.message}`);
+      setStatus(`Note failed: ${error.message}`);
     }
   });
 
@@ -189,7 +198,7 @@ async function loadNotes() {
     state.notes = await api(`/api/notes${suffix}`);
     renderNotes();
   } catch (error) {
-    setStatus(`Load notes failed: ${error.message}`);
+    setStatus(`Note load failed: ${error.message}`);
   }
 }
 
@@ -215,16 +224,24 @@ function renderNotes() {
       if (!newTitle) return;
       const newContent = prompt("New content", note.content || "");
       if (newContent === null) return;
-      await api(`/api/note?id=${encodeURIComponent(note.id)}`, {
-        method: "PUT",
-        body: JSON.stringify({ title: newTitle, content: newContent, tags: note.tags || [] }),
-      });
-      await loadNotes();
+      try {
+        await api(`/api/note?id=${encodeURIComponent(note.id)}`, {
+          method: "PUT",
+          body: JSON.stringify({ title: newTitle, content: newContent, tags: note.tags || [] }),
+        });
+        await loadNotes();
+      } catch (error) {
+        setStatus(`Note update failed: ${error.message}`);
+      }
     });
 
     item.querySelector('[data-action="delete"]').addEventListener("click", async () => {
-      await api(`/api/note?id=${encodeURIComponent(note.id)}`, { method: "DELETE" });
-      await loadNotes();
+      try {
+        await api(`/api/note?id=${encodeURIComponent(note.id)}`, { method: "DELETE" });
+        await loadNotes();
+      } catch (error) {
+        setStatus(`Note delete failed: ${error.message}`);
+      }
     });
 
     list.appendChild(item);
@@ -237,16 +254,23 @@ function bindChatActions() {
     const roomName = document.querySelector("#room-name").value.trim();
     if (!roomName) return;
 
-    await api("/api/chat/rooms", {
-      method: "POST",
-      body: JSON.stringify({ name: roomName }),
-    });
-    event.target.reset();
-    await loadRooms();
+    try {
+      await api("/api/chat/rooms", {
+        method: "POST",
+        body: JSON.stringify({ name: roomName }),
+      });
+      event.target.reset();
+      await loadRooms();
+      await loadMessages();
+      setStatus("Room created");
+    } catch (error) {
+      setStatus(`Room create failed: ${error.message}`);
+    }
   });
 
   document.querySelector("#chat-room-select").addEventListener("change", loadMessages);
   document.querySelector("#refresh-chat").addEventListener("click", async () => {
+    await loadRooms();
     await loadMessages();
     await connectChatSocket();
   });
@@ -255,7 +279,7 @@ function bindChatActions() {
     event.preventDefault();
     const roomId = getSelectedRoomId();
     if (!roomId) {
-      setStatus("Create/select a room first");
+      setStatus("Select a room first");
       return;
     }
 
@@ -263,21 +287,31 @@ function bindChatActions() {
     const content = document.querySelector("#chat-message").value.trim();
     if (!content) return;
 
-    await api("/api/chat/messages", {
-      method: "POST",
-      body: JSON.stringify({ roomId, sender, content }),
-    });
-    document.querySelector("#chat-message").value = "";
-    await loadMessages();
+    try {
+      await api("/api/chat/messages", {
+        method: "POST",
+        body: JSON.stringify({ roomId, sender, content }),
+      });
+      document.querySelector("#chat-message").value = "";
+      await loadMessages();
+    } catch (error) {
+      setStatus(`Message send failed: ${error.message}`);
+    }
   });
 }
 
 async function loadRooms() {
   try {
-    state.rooms = await api("/api/chat/rooms");
+    const rooms = await api("/api/chat/rooms");
+    state.rooms = Array.isArray(rooms) ? rooms : [];
     renderRoomOptions();
+    if (state.rooms.length === 0) {
+      setStatus("No rooms yet. Create one.");
+    }
   } catch (error) {
-    setStatus(`Load rooms failed: ${error.message}`);
+    state.rooms = [];
+    renderRoomOptions();
+    setStatus(`Room load failed: ${error.message}`);
   }
 }
 
@@ -286,6 +320,15 @@ function renderRoomOptions() {
   const current = select.value;
   select.innerHTML = "";
 
+  if (state.rooms.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No rooms available";
+    select.appendChild(option);
+    select.value = "";
+    return;
+  }
+
   state.rooms.forEach((room) => {
     const option = document.createElement("option");
     option.value = room.id;
@@ -293,8 +336,10 @@ function renderRoomOptions() {
     select.appendChild(option);
   });
 
-  if (current) {
+  if (current && state.rooms.some((room) => room.id === current)) {
     select.value = current;
+  } else {
+    select.selectedIndex = 0;
   }
 }
 
@@ -311,10 +356,11 @@ async function loadMessages() {
   }
 
   try {
-    state.messages = await api(`/api/chat/messages?roomId=${encodeURIComponent(roomId)}`);
+    const messages = await api(`/api/chat/messages?roomId=${encodeURIComponent(roomId)}`);
+    state.messages = Array.isArray(messages) ? messages : [];
     renderMessages();
   } catch (error) {
-    setStatus(`Load chat failed: ${error.message}`);
+    setStatus(`Chat load failed: ${error.message}`);
   }
 }
 
@@ -336,21 +382,45 @@ function renderMessages() {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function setChatConnection(text) {
+  document.querySelector("#chat-connection").textContent = text;
+}
+
+function startPollingFallback() {
+  if (state.pollTimer) return;
+  state.pollTimer = setInterval(() => {
+    loadMessages();
+  }, 4000);
+}
+
+function stopPollingFallback() {
+  if (!state.pollTimer) return;
+  clearInterval(state.pollTimer);
+  state.pollTimer = null;
+}
+
 async function connectChatSocket() {
-  const statusNode = document.querySelector("#chat-connection");
   try {
     const info = await api("/api/chat/ws");
-    if (state.ws) state.ws.close();
+    if (!info || !info.websocketUrl) {
+      throw new Error("websocket URL unavailable");
+    }
 
+    if (state.ws) state.ws.close();
     state.ws = new WebSocket(info.websocketUrl);
+    setChatConnection("connecting");
+
     state.ws.onopen = () => {
-      statusNode.textContent = "online";
+      setChatConnection("realtime");
+      stopPollingFallback();
     };
     state.ws.onclose = () => {
-      statusNode.textContent = "offline";
+      setChatConnection("polling");
+      startPollingFallback();
     };
     state.ws.onerror = () => {
-      statusNode.textContent = "error";
+      setChatConnection("polling");
+      startPollingFallback();
     };
     state.ws.onmessage = (event) => {
       try {
@@ -364,9 +434,9 @@ async function connectChatSocket() {
         // Ignore non-JSON websocket messages.
       }
     };
-  } catch (error) {
-    statusNode.textContent = "offline";
-    setStatus(`WebSocket failed: ${error.message}`);
+  } catch (_) {
+    setChatConnection("polling");
+    startPollingFallback();
   }
 }
 

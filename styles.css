@@ -1,13 +1,11 @@
 :root {
-  --bg: #0b1110;
-  --panel: #121b19;
-  --panel-soft: #172522;
-  --text: #d5f2e8;
-  --muted: #88a69b;
-  --accent: #29d97f;
-  --accent-strong: #1df29c;
-  --danger: #ff6e6e;
-  --border: #21453a;
+  --bg: #f5f5f5;
+  --panel: #ffffff;
+  --text: #1e1e1e;
+  --muted: #707070;
+  --border: #dfdfdf;
+  --border-strong: #c9c9c9;
+  --danger: #8b4141;
 }
 
 * {
@@ -17,96 +15,101 @@
 body {
   margin: 0;
   font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(circle at top right, #10211d 0%, var(--bg) 45%);
+  background: var(--bg);
   color: var(--text);
 }
 
 .app-shell {
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: 220px 1fr;
   min-height: 100vh;
 }
 
 .sidebar {
   border-right: 1px solid var(--border);
-  background: rgba(18, 27, 25, 0.85);
-  backdrop-filter: blur(8px);
-  padding: 1.5rem;
+  background: var(--panel);
+  padding: 1.2rem;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
+  gap: 0.65rem;
+  margin-bottom: 1.6rem;
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .brand p {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .brand-dot {
-  width: 18px;
-  height: 18px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: linear-gradient(160deg, var(--accent), #1e8d5c);
-  box-shadow: 0 0 0 6px rgba(41, 217, 127, 0.15);
+  background: #3f3f3f;
 }
 
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.45rem;
 }
 
 .menu-btn {
   text-align: left;
   background: transparent;
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.65rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
   cursor: pointer;
 }
 
-.menu-btn.active,
+.menu-btn.active {
+  border-color: var(--border-strong);
+  background: #f8f8f8;
+}
+
 .menu-btn:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(41, 217, 127, 0.45);
+  background: #f8f8f8;
 }
 
 .content {
-  padding: 1.5rem;
+  padding: 1.2rem;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.topbar h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .pill {
   border: 1px solid var(--border);
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.8rem;
-}
-
-.pill.subtle {
+  font-size: 0.76rem;
   color: var(--muted);
 }
 
 .view {
   display: none;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .view.active {
@@ -114,27 +117,34 @@ body {
 }
 
 .card {
-  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1rem;
+  border-radius: 10px;
+  padding: 0.85rem;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.6rem;
 }
 
 .form-grid {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.55rem;
 }
 
 .inline {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -143,26 +153,25 @@ input,
 textarea,
 select,
 button {
-  background: #0e1715;
+  background: #fff;
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
   font: inherit;
 }
 
 textarea {
-  min-height: 95px;
+  min-height: 88px;
   resize: vertical;
 }
 
 button {
   cursor: pointer;
-  border-color: #2f8f64;
 }
 
 button:hover {
-  border-color: var(--accent);
+  border-color: var(--border-strong);
 }
 
 .list {
@@ -170,60 +179,59 @@ button:hover {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 0.7rem;
+  gap: 0.55rem;
 }
 
 .item {
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.75rem;
+  border-radius: 9px;
+  padding: 0.7rem;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.42rem;
 }
 
 .item-meta {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .item-actions {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
 }
 
 .danger {
-  border-color: #8a3b3b;
   color: var(--danger);
 }
 
 .chat-toolbar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.8rem;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
 }
 
 .chat-box {
-  height: 320px;
+  height: 300px;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.8rem;
+  border-radius: 9px;
+  padding: 0.7rem;
   display: grid;
-  gap: 0.5rem;
-  margin-bottom: 0.8rem;
-  background: #0b1513;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+  background: #fff;
 }
 
 .chat-msg {
-  border: 1px solid #1d3a31;
-  border-radius: 10px;
-  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
 }
 
 .chat-msg b {
-  color: var(--accent-strong);
+  color: #333;
 }
 
 @media (max-width: 900px) {
