@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taubyte Client Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-dot"></div>
+          <div>
+            <h1>Taubyte Demo</h1>
+            <p>Client Showcase</p>
+          </div>
+        </div>
+        <nav class="menu">
+          <button class="menu-btn active" data-route="todos">Todos</button>
+          <button class="menu-btn" data-route="notes">Notes</button>
+          <button class="menu-btn" data-route="chat">Chat</button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <h2 id="page-title">Todos</h2>
+          <span class="pill" id="status-pill">Ready</span>
+        </header>
+
+        <section id="view-todos" class="view active">
+          <div class="card">
+            <h3>Create Todo</h3>
+            <form id="todo-form" class="form-grid">
+              <input id="todo-title" placeholder="Title" required />
+              <input id="todo-priority" placeholder="Priority (low, medium, high)" />
+              <input id="todo-dueDate" placeholder="Due date (YYYY-MM-DD)" />
+              <textarea id="todo-description" placeholder="Description"></textarea>
+              <button type="submit">Add Todo</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Todo List</h3>
+              <div class="inline">
+                <select id="todo-filter">
+                  <option value="all">All</option>
+                  <option value="open">Open</option>
+                  <option value="done">Completed</option>
+                </select>
+                <button id="refresh-todos">Refresh</button>
+              </div>
+            </div>
+            <ul id="todo-list" class="list"></ul>
+          </div>
+        </section>
+
+        <section id="view-notes" class="view">
+          <div class="card">
+            <h3>Create Note</h3>
+            <form id="note-form" class="form-grid">
+              <input id="note-title" placeholder="Title" required />
+              <input id="note-tags" placeholder="Tags comma separated" />
+              <textarea id="note-content" placeholder="Content" required></textarea>
+              <button type="submit">Save Note</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Notes</h3>
+              <div class="inline">
+                <input id="note-search" placeholder="Search notes" />
+                <button id="refresh-notes">Refresh</button>
+              </div>
+            </div>
+            <ul id="note-list" class="list"></ul>
+          </div>
+        </section>
+
+        <section id="view-chat" class="view">
+          <div class="card">
+            <h3>Create Chat Room</h3>
+            <form id="room-form" class="inline">
+              <input id="room-name" placeholder="Room name" required />
+              <button type="submit">Create Room</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="chat-toolbar">
+              <select id="chat-room-select"></select>
+              <button id="refresh-chat">Refresh</button>
+              <span id="chat-connection" class="pill subtle">offline</span>
+            </div>
+            <div id="chat-messages" class="chat-box"></div>
+            <form id="chat-form" class="inline">
+              <input id="chat-sender" placeholder="Your name" />
+              <input id="chat-message" placeholder="Type your message" required />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
