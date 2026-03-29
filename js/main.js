@@ -5,6 +5,7 @@ const state = {
   ws: null,
   pollTimer: null,
 };
+const CHAT_SENDER_KEY = "taubyte_demo_chat_sender";
 
 const pageTitle = document.querySelector("#page-title");
 const statusPill = document.querySelector("#status-pill");
@@ -15,6 +16,7 @@ function init() {
   bindNavigation();
   bindTodos();
   bindChat();
+  hydrateChatSender();
   showPage("home");
   bootstrapData();
 }
@@ -77,12 +79,14 @@ function bindTodos() {
 async function onCreateTodo(event) {
   event.preventDefault();
   setStatus("Saving todo");
+  const title = document.querySelector("#todo-title").value.trim();
+  if (!title) return;
 
   const payload = {
-    title: document.querySelector("#todo-title").value.trim(),
-    priority: document.querySelector("#todo-priority").value.trim() || "medium",
-    dueDate: document.querySelector("#todo-dueDate").value.trim(),
-    description: document.querySelector("#todo-description").value.trim(),
+    title,
+    priority: "normal",
+    dueDate: "",
+    description: "",
     completed: false,
   };
 
@@ -121,19 +125,18 @@ function renderTodos() {
   visible.forEach((todo) => {
     const node = document.createElement("li");
     node.className = "rounded-lg border border-brand-200 bg-brand-50 p-3";
+    const titleClass = todo.completed ? "line-through text-brand-500" : "text-brand-900";
     node.innerHTML = `
-      <div class="font-medium">${escapeHtml(todo.title)}</div>
-      <div class="mt-1 text-sm text-brand-600">${escapeHtml(todo.description || "")}</div>
-      <div class="mt-2 text-xs text-brand-500">Priority: ${escapeHtml(todo.priority || "n/a")} | Due: ${escapeHtml(todo.dueDate || "n/a")}</div>
-      <div class="mt-3 flex flex-wrap gap-2">
-        <button data-action="toggle" class="rounded-md border border-brand-300 bg-white px-2.5 py-1 text-xs hover:bg-brand-100">
-          ${todo.completed ? "Mark Open" : "Mark Done"}
-        </button>
+      <div class="flex items-center justify-between gap-3">
+        <label class="flex cursor-pointer items-center gap-3">
+          <input data-action="toggle" type="checkbox" class="h-4 w-4 rounded border-brand-400 text-brand-700 focus:ring-brand-300" ${todo.completed ? "checked" : ""} />
+          <span class="font-medium ${titleClass}">${escapeHtml(todo.title)}</span>
+        </label>
         <button data-action="delete" class="rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs text-red-700 hover:bg-red-50">Delete</button>
       </div>
     `;
 
-    node.querySelector('[data-action="toggle"]').addEventListener("click", async () => {
+    node.querySelector('[data-action="toggle"]').addEventListener("change", async (event) => {
       try {
         await api(`/api/todo?id=${encodeURIComponent(todo.id)}`, {
           method: "PUT",
@@ -142,7 +145,7 @@ function renderTodos() {
             description: todo.description,
             priority: todo.priority,
             dueDate: todo.dueDate,
-            completed: !todo.completed,
+            completed: event.target.checked,
           }),
         });
         await loadTodos();
@@ -169,6 +172,7 @@ function bindChat() {
   document.querySelector("#refresh-chat").addEventListener("click", onRefreshChat);
   document.querySelector("#chat-room-select").addEventListener("change", loadMessages);
   document.querySelector("#chat-form").addEventListener("submit", onSendMessage);
+  document.querySelector("#chat-sender").addEventListener("input", persistChatSender);
 }
 
 async function onCreateRoom(event) {
@@ -245,7 +249,7 @@ async function onSendMessage(event) {
     return;
   }
 
-  const sender = document.querySelector("#chat-sender").value.trim() || "anonymous";
+  const sender = getSenderName();
   const content = document.querySelector("#chat-message").value.trim();
   if (!content) return;
 
@@ -280,7 +284,7 @@ async function loadMessages() {
 
 function renderMessages() {
   const box = document.querySelector("#chat-messages");
-  const myName = (document.querySelector("#chat-sender").value.trim() || "anonymous").toLowerCase();
+  const myName = getSenderName().toLowerCase();
   box.innerHTML = "";
 
   state.messages.forEach((message) => {
@@ -357,6 +361,28 @@ async function connectChatSocket() {
 function refreshHomeStats() {
   document.querySelector("#home-todos-count").textContent = String(state.todos.length);
   document.querySelector("#home-rooms-count").textContent = String(state.rooms.length);
+}
+
+function hydrateChatSender() {
+  const savedName = localStorage.getItem(CHAT_SENDER_KEY);
+  if (savedName) {
+    document.querySelector("#chat-sender").value = savedName;
+  }
+}
+
+function persistChatSender() {
+  const name = document.querySelector("#chat-sender").value.trim();
+  if (!name) {
+    localStorage.removeItem(CHAT_SENDER_KEY);
+    return;
+  }
+  localStorage.setItem(CHAT_SENDER_KEY, name);
+}
+
+function getSenderName() {
+  const value = document.querySelector("#chat-sender").value.trim();
+  if (!value) return "anonymous";
+  return value;
 }
 
 function formatDate(value) {
