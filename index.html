@@ -4,104 +4,140 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Taubyte Client Demo</title>
-    <link rel="stylesheet" href="./css/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#f7f7f7",
+                100: "#efefef",
+                200: "#dfdfdf",
+                300: "#c8c8c8",
+                400: "#a8a8a8",
+                500: "#8a8a8a",
+                600: "#6f6f6f",
+                700: "#565656",
+                800: "#3f3f3f",
+                900: "#2e2e2e"
+              }
+            }
+          }
+        }
+      };
+    </script>
   </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <span class="brand-dot"></span>
+  <body class="bg-brand-50 text-brand-900">
+    <header class="sticky top-0 z-20 border-b border-brand-200 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+          <span class="h-2.5 w-2.5 rounded-full bg-brand-700"></span>
           <div>
-            <h1>Taubyte Demo</h1>
-            <p>Client Showcase</p>
+            <p class="text-sm font-semibold">Taubyte Client Demo</p>
+            <p class="text-xs text-brand-500">Minimal Light Experience</p>
           </div>
         </div>
-        <nav class="menu">
-          <button class="menu-btn active" data-route="todos">Todos</button>
-          <button class="menu-btn" data-route="notes">Notes</button>
-          <button class="menu-btn" data-route="chat">Chat</button>
+        <nav class="flex items-center gap-2">
+          <button data-page="home" class="nav-link rounded-lg px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-100">Home</button>
+          <button data-page="todos" class="nav-link rounded-lg px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-100">Todos</button>
+          <button data-page="chat" class="nav-link rounded-lg px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-100">Chat</button>
         </nav>
-      </aside>
+      </div>
+    </header>
 
-      <main class="content">
-        <header class="topbar">
-          <h2 id="page-title">Todos</h2>
-          <span id="status-pill" class="pill">Ready</span>
-        </header>
+    <main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div class="mb-5 flex items-center justify-between">
+        <h1 id="page-title" class="text-xl font-semibold text-brand-900">Home</h1>
+        <span id="status-pill" class="rounded-full border border-brand-300 bg-white px-3 py-1 text-xs text-brand-600">Ready</span>
+      </div>
 
-        <section id="view-todos" class="view active">
-          <div class="card">
-            <h3>Create Todo</h3>
-            <form id="todo-form" class="form-grid">
-              <input id="todo-title" placeholder="Title" required />
-              <input id="todo-priority" placeholder="Priority (low, medium, high)" />
-              <input id="todo-dueDate" placeholder="Due date (YYYY-MM-DD)" />
-              <textarea id="todo-description" placeholder="Description"></textarea>
-              <button type="submit">Add Todo</button>
-            </form>
-          </div>
-          <div class="card">
-            <div class="card-header">
-              <h3>Todo List</h3>
-              <div class="inline">
-                <select id="todo-filter">
-                  <option value="all">All</option>
-                  <option value="open">Open</option>
-                  <option value="done">Completed</option>
-                </select>
-                <button id="refresh-todos">Refresh</button>
-              </div>
+      <section id="page-home" class="page grid gap-4">
+        <div class="rounded-xl border border-brand-200 bg-white p-5">
+          <h2 class="text-lg font-semibold">Project Overview</h2>
+          <p class="mt-2 text-sm text-brand-600">
+            Lightweight Taubyte demo with a clean todo flow and real-time capable chat.
+            If realtime is unavailable, chat falls back to polling automatically.
+          </p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <article class="rounded-xl border border-brand-200 bg-white p-4">
+            <p class="text-xs uppercase tracking-wide text-brand-500">Todos</p>
+            <p id="home-todos-count" class="mt-2 text-2xl font-semibold">0</p>
+          </article>
+          <article class="rounded-xl border border-brand-200 bg-white p-4">
+            <p class="text-xs uppercase tracking-wide text-brand-500">Chat Rooms</p>
+            <p id="home-rooms-count" class="mt-2 text-2xl font-semibold">0</p>
+          </article>
+          <article class="rounded-xl border border-brand-200 bg-white p-4">
+            <p class="text-xs uppercase tracking-wide text-brand-500">Chat Mode</p>
+            <p id="home-chat-mode" class="mt-2 text-2xl font-semibold">Polling</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-todos" class="page hidden grid gap-4">
+        <div class="rounded-xl border border-brand-200 bg-white p-5">
+          <h2 class="text-lg font-semibold">Create Todo</h2>
+          <form id="todo-form" class="mt-4 grid gap-3">
+            <input id="todo-title" required placeholder="Title" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+            <div class="grid gap-3 sm:grid-cols-2">
+              <input id="todo-priority" placeholder="Priority (low, medium, high)" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+              <input id="todo-dueDate" placeholder="Due date (YYYY-MM-DD)" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
             </div>
-            <ul id="todo-list" class="list"></ul>
-          </div>
-        </section>
-
-        <section id="view-notes" class="view">
-          <div class="card">
-            <h3>Create Note</h3>
-            <form id="note-form" class="form-grid">
-              <input id="note-title" placeholder="Title" required />
-              <input id="note-tags" placeholder="Tags comma separated" />
-              <textarea id="note-content" placeholder="Content" required></textarea>
-              <button type="submit">Save Note</button>
-            </form>
-          </div>
-          <div class="card">
-            <div class="card-header">
-              <h3>Notes</h3>
-              <div class="inline">
-                <input id="note-search" placeholder="Search notes" />
-                <button id="refresh-notes">Refresh</button>
-              </div>
+            <textarea id="todo-description" placeholder="Description" class="min-h-[92px] rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500"></textarea>
+            <div class="flex justify-end">
+              <button type="submit" class="rounded-lg border border-brand-300 bg-brand-100 px-4 py-2 text-sm font-medium hover:bg-brand-200">Add Todo</button>
             </div>
-            <ul id="note-list" class="list"></ul>
-          </div>
-        </section>
+          </form>
+        </div>
 
-        <section id="view-chat" class="view">
-          <div class="card">
-            <h3>Create Chat Room</h3>
-            <form id="room-form" class="inline">
-              <input id="room-name" placeholder="Room name" required />
-              <button type="submit">Create Room</button>
-            </form>
-          </div>
-          <div class="card">
-            <div class="chat-toolbar">
-              <select id="chat-room-select"></select>
-              <button id="refresh-chat">Refresh</button>
-              <span id="chat-connection" class="pill">connecting</span>
+        <div class="rounded-xl border border-brand-200 bg-white p-5">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold">Todo List</h2>
+            <div class="flex items-center gap-2">
+              <select id="todo-filter" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                <option value="all">All</option>
+                <option value="open">Open</option>
+                <option value="done">Completed</option>
+              </select>
+              <button id="refresh-todos" class="rounded-lg border border-brand-300 bg-white px-3 py-2 text-sm hover:bg-brand-100">Refresh</button>
             </div>
-            <div id="chat-messages" class="chat-box"></div>
-            <form id="chat-form" class="inline">
-              <input id="chat-sender" placeholder="Your name" />
-              <input id="chat-message" placeholder="Type your message" required />
-              <button type="submit">Send</button>
-            </form>
           </div>
-        </section>
-      </main>
-    </div>
+          <ul id="todo-list" class="grid gap-2"></ul>
+        </div>
+      </section>
+
+      <section id="page-chat" class="page hidden">
+        <div class="grid gap-4 lg:grid-cols-[300px,1fr]">
+          <aside class="rounded-xl border border-brand-200 bg-white p-4">
+            <div class="mb-4">
+              <h2 class="text-lg font-semibold">Rooms</h2>
+              <p class="text-xs text-brand-500">Create and switch conversations</p>
+            </div>
+            <form id="room-form" class="mb-4 flex gap-2">
+              <input id="room-name" required placeholder="New room name" class="w-full rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+              <button type="submit" class="rounded-lg border border-brand-300 bg-brand-100 px-3 py-2 text-sm hover:bg-brand-200">Add</button>
+            </form>
+            <div class="mb-3 flex items-center justify-between">
+              <span class="text-xs text-brand-500">Connection</span>
+              <span id="chat-connection" class="rounded-full border border-brand-300 px-2 py-0.5 text-xs text-brand-600">connecting</span>
+            </div>
+            <select id="chat-room-select" class="w-full rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500"></select>
+            <button id="refresh-chat" class="mt-3 w-full rounded-lg border border-brand-300 bg-white px-3 py-2 text-sm hover:bg-brand-100">Refresh</button>
+          </aside>
+
+          <section class="rounded-xl border border-brand-200 bg-white p-4">
+            <div id="chat-messages" class="h-[420px] overflow-y-auto rounded-lg border border-brand-200 bg-brand-50 p-3"></div>
+            <form id="chat-form" class="mt-3 grid gap-2 sm:grid-cols-[180px,1fr,auto]">
+              <input id="chat-sender" placeholder="Your name" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+              <input id="chat-message" required placeholder="Type a message" class="rounded-lg border border-brand-300 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+              <button type="submit" class="rounded-lg border border-brand-300 bg-brand-100 px-4 py-2 text-sm font-medium hover:bg-brand-200">Send</button>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
 
     <script type="module" src="./js/main.js"></script>
   </body>
