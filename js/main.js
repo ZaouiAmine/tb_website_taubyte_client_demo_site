@@ -79,7 +79,13 @@ function bindTodos() {
 async function onCreateTodo(event) {
   event.preventDefault();
   setStatus("Saving todo");
-  const title = document.querySelector("#todo-title").value.trim();
+  const titleInput = event.currentTarget.querySelector("#todo-title");
+  if (!titleInput) {
+    setStatus("Todo form missing");
+    return;
+  }
+
+  const title = titleInput.value.trim();
   if (!title) return;
 
   const payload = {
