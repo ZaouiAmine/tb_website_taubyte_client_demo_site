@@ -6,6 +6,7 @@ const state = {
   pollTimer: null,
 };
 const CHAT_SENDER_KEY = "taubyte_demo_chat_sender";
+let wsRefreshTimer = null;
 
 const pageTitle = document.querySelector("#page-title");
 const statusPill = document.querySelector("#status-pill");
@@ -347,16 +348,18 @@ async function connectChatSocket() {
       startPollingFallback();
     };
     state.ws.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        const activeRoom = selectedRoomId();
-        if (payload.roomId && payload.roomId === activeRoom) {
-          state.messages.push(payload);
-          renderMessages();
-        }
-      } catch (_) {
-        // Ignore non-JSON events.
+      const activeRoom = selectedRoomId();
+      const message = extractRealtimeMessage(event.data);
+
+      if (message && message.roomId && message.roomId === activeRoom) {
+        state.messages.push(message);
+        renderMessages();
+        return;
       }
+
+      // Some pubsub websocket events arrive wrapped/encrypted in a shape we
+      // don't directly decode on the client, so we fetch fresh messages quickly.
+      scheduleRealtimeRefresh();
     };
   } catch (_) {
     setConnection("polling");
@@ -405,4 +408,70 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function scheduleRealtimeRefresh() {
+  if (wsRefreshTimer) return;
+  wsRefreshTimer = setTimeout(async () => {
+    wsRefreshTimer = null;
+    await loadMessages();
+  }, 250);
+}
+
+function extractRealtimeMessage(rawData) {
+  let parsed;
+  try {
+    parsed = JSON.parse(rawData);
+  } catch (_) {
+    return null;
+  }
+
+  if (isChatMessageShape(parsed)) return parsed;
+
+  const directCandidates = [
+    parsed.message,
+    parsed.data,
+    parsed.payload,
+    parsed.event,
+    parsed.body,
+  ];
+
+  for (const candidate of directCandidates) {
+    const normalized = normalizeCandidate(candidate);
+    if (normalized) return normalized;
+  }
+
+  if (Array.isArray(parsed.messages)) {
+    for (const candidate of parsed.messages) {
+      const normalized = normalizeCandidate(candidate);
+      if (normalized) return normalized;
+    }
+  }
+
+  return null;
+}
+
+function normalizeCandidate(candidate) {
+  if (!candidate) return null;
+  if (isChatMessageShape(candidate)) return candidate;
+
+  if (typeof candidate === "string") {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (isChatMessageShape(parsed)) return parsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function isChatMessageShape(value) {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof value.roomId === "string" &&
+      typeof value.content === "string"
+  );
 }
