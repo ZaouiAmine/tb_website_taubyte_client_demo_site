@@ -2,5 +2,5 @@
 set -e
 
 cp index.html /out/
-cp styles.css /out/
-cp app.js /out/
+cp -r css /out/
+cp -r js /out/
